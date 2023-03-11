@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import Alert from "./components/Alert";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Button from "@mui/material/Button";
 import Task from "./components/Task";
 
 const App = () => {
@@ -7,16 +9,12 @@ const App = () => {
   const [tasks, setTasks] = useState(() => {
     return JSON.parse(localStorage.getItem("tasks")) || [];
   });
-  const [alert, setAlert] = useState({
-    show: false,
-    msg: "",
-    type: "",
-  });
   const [isEdit, setIsEdit] = useState(false);
   const [editID, setEditID] = useState(null);
+  const [date, setDate] = useState("");
 
-  const handleAlert = (show, msg, type) => {
-    setAlert({ show, msg, type });
+  const validate = () => {
+    return !task.length || !date.length;
   };
 
   useEffect(() => {
@@ -25,70 +23,107 @@ const App = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!task) {
-      handleAlert(true, "cant add empty space", "danger");
-      return;
-    } else if (task && isEdit) {
+
+    if (task && isEdit) {
       setTasks(
         tasks.map((item) => {
           if (item.id === editID) {
-            return { ...item, title: task };
+            return { ...item, title: task, date };
           }
           return item;
         })
       );
       setTask("");
+      setDate("");
       setIsEdit(false);
       setEditID(null);
     } else {
-      const newTask = { id: new Date().getTime().toString(), title: task };
+      const newTask = {
+        id: new Date().getTime().toString(),
+        title: task,
+        date,
+      };
       setTasks([...tasks, newTask]);
-      handleAlert(true, "Task added to lists", "success");
+      const addTask = () => toast("Task added to lists");
+      addTask();
       setTask("");
+      setDate("");
     }
   };
 
   const handleDelete = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
-    handleAlert(true, "Task removed successfully", "danger");
+    const handleDeleteTask = () => toast("Task removed successfully");
+    handleDeleteTask();
   };
 
   const handleEdit = (id) => {
     const editItem = tasks.find((task) => task.id === id);
     setTask(editItem.title);
+    setDate(editItem.date);
     setIsEdit(true);
     setEditID(id);
   };
 
   return (
-    <div className="app-wrap">
-      <form className="form-wrap" onSubmit={handleSubmit}>
-        {alert.show && (
-          <Alert {...alert} removeAlert={handleAlert} tasks={tasks} />
-        )}
-        <h2>Todo App</h2>
-        <div className="form-control">
-          <input
-            type="text"
-            className="input"
-            placeholder="Add a task"
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
-          />
-          <button className="submit-btn">Submit</button>
-        </div>
-      </form>
-      {tasks.length > 0 ? (
+    <div className="container">
+      <div className="app-wrap">
+        <form className="form-wrap" onSubmit={handleSubmit}>
+          <h2 className="title">Todo App</h2>
+          <div className="form-control">
+            <label className="label">Task</label>
+            <input
+              type="text"
+              className="input"
+              placeholder="Add a task"
+              value={task}
+              onChange={(e) => setTask(e.target.value)}
+            />
+            <label className="label">Completion date</label>
+            <br />
+            <input
+              type="date"
+              className="input"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <Button
+              variant="contained"
+              disabled={validate()}
+              type="submit"
+              sx={{ float: "right" }}
+            >
+              Submit
+            </Button>
+          </div>
+        </form>
+        {tasks.length === 0 && <p className="no-items">No task for now</p>}
+      </div>
+      {tasks.length > 0 && (
         <div className="task-wrap">
-          <Task
-            tasks={tasks}
-            handleDelete={handleDelete}
-            handleEdit={handleEdit}
-          />
+          <table width="100%">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Completion date</th>
+                <th>Edit</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tasks.map((task) => (
+                <Task
+                  key={task.id}
+                  {...task}
+                  handleDelete={handleDelete}
+                  handleEdit={handleEdit}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <p>No task for now </p>
       )}
+      <ToastContainer />
     </div>
   );
 };

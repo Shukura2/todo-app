@@ -1,28 +1,39 @@
-const Task = ({ tasks, handleDelete, handleEdit }) => {
+import { useState } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+
+const Task = ({ id, title, date, handleDelete, handleEdit }) => {
+  const [showMore, setShowMore] = useState(false);
   return (
-    <div>
-      {tasks.map((task) => (
-        <div key={task.id} className="task">
-          <p className="title">{task.title}</p>
-          <div>
-            <button
-              type="button"
-              className="edit-btn"
-              onClick={() => handleEdit(task.id)}
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              className="delete-btn"
-              onClick={() => handleDelete(task.id)}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
+    <tr>
+      <td>
+        {showMore ? title : title.substring(0, 40)}
+        <br /> <br />
+        <button onClick={() => setShowMore(!showMore)} className="show-more">
+          {showMore ? "show less" : "show more"}
+        </button>
+      </td>
+      <td>{date}</td>
+
+      <td>
+        <button
+          type="button"
+          className="edit-btn"
+          onClick={() => handleEdit(id)}
+        >
+          <EditIcon />
+        </button>
+      </td>
+      <td>
+        <button
+          type="button"
+          className="delete-btn"
+          onClick={() => handleDelete(id)}
+        >
+          <DeleteIcon />
+        </button>
+      </td>
+    </tr>
   );
 };
 
