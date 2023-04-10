@@ -6,7 +6,7 @@ const Task = ({ id, title, date, handleDelete, handleEdit }) => {
   const [showMore, setShowMore] = useState(false);
   return (
     <tr>
-      <td>
+      <td style={{ maxWidth: "350px" }}>
         {showMore ? title : title.substring(0, 40)}
         <br /> <br />
         <button onClick={() => setShowMore(!showMore)} className="show-more">
